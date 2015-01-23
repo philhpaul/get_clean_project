@@ -1,0 +1,81 @@
+
+CodeBook for run_analysis.R
+
+The data are taken from (hearinafter "authors"): 
+Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. 
+Human Activity Recognition on Smartphones using a Multiclass Hardware-Friendly Support Vector Machine. 
+International Workshop of Ambient Assisted Living (IWAAL 2012). Vitoria-Gasteiz, Spain. Dec 2012. 
+  
+According to the authors, the raw data consists of times series recordings of:
+30 users conducting 6 activities: Walking, walking upstairs, walking downstairs, sitting, standing and lying.
+The users were instrumented with Samsung Galaxy 2's. The signals from the 3-axis linear acceleration and 3-axis gyro's (angular velocity) were recorded at a constant rate of 50Hz.
+The 6 sensor signals were pre-processed by a noise filter (type and poles not specified) and then sampled into 2.56 sec / 50% overlap windows, creating 128 point “processed data windows”. 
+The pre-processed data was low-pass filtered (0.3 Hz Butterworth, number of poles not specified). The passed signal (low frequency component) was assigned to a "Gravity" component.
+This gravity signal was subracted from the total signal to produce a "Body" signal. This process was done to remove gravity induced sensor bias and offset.  
+The resulting 12 processed signals (6 Body and 6 gravity) were then further processed to obtain a set of gross "features" (e.g. mean body acceleration for X, Y, Z axis). 
+This further prcessing was done in both time- and frequency-domains. There are a total of 561 such "features" (semi-descriptive names are provided by the authors).
+
+The authors feature data is of the form [subject = 1,30 : activity = 1,6 : record = 1,n : feature = 1,561] 
+Each subject completed all activities. For each subject_activity there are at least 1 and up to n records.
+The authors give a full set of feature values for each subject_activity_record. 
+
+run_anlysis.R produces:
+An internal tidy set (df) of the form [subject = 1,30 : activity = 1,6 : record = 1,n : select_features = 1,36] 
+An output tidy set (f) of the form [subject = 1,30 : activity = 1,6 : select_features = 1,36]
+  where the results are averaged over all record = 1,n 
+
+Select_features to be included in the Tidy data set:
+The frequency domain features as reported are ignored. 
+The authors have not detailed how the f-domain processing was done.
+The results are all believed of questionable value because: 
+  1) they likely remain strongly biased by the transfer function of the individual sensors.
+  2) f-domain characteristics should have been taken on the full data sets (not on windows) with an applied cosine taper. 
+  3) the “stationarity” of the data was not established.  
+  4) actificats introduced by the "normalization" mentioned below.
+
+The Gravity features are ignored (except as specifically noted). The objective is to provide a tidy data set to underly 
+study/test of possible advanced algorithms to quantify user motion/activity from processed accelerometer/gyrmometer sensors. 
+To this end the Gravity features are:
+  1) Not interesting, the Body features are the target.
+  2) In any algorithm application the gravity signal would be removed and discared in pre-processing.
+  3) AN EXCEPTION - the mean gravity signal is retained as this is needed to put the Body vector components into directional context.  
+
+The tidy feature set includes measures labeled with ‘jerk’ but no definition is given by the authors.
+  Jerk is taken in the classical physics sense of being the time-derivative of a quantity.
+
+The tidy feature set includes items labeled with 'mag' but no definition is given by the authors. 
+  Mag is taken to mean 'magnitude' in the classical physics sense of being the vector-magnitude.  
+  Hopefully as taken on the time-series data and not as taken on the feature values, but this is not specified by the authors 
+
+Interpretation of the meaning of authors feature labels:
+The feature label 'tBodyAcc-mean()-X' is taken to be the mean time-domain body acceleration 
+  from the x-directed accelerometer. 
+The feature label 'tBodyAccJerk-mean()-X' is taken to be the mean time-domain time-derivative  
+  of body acceleration from the x-directed accelerometer. 
+The feature label 'tBodyAccMag-mean()' is taken to be the mean time-domain magnitude of
+  the body acceleration vector (i.e. magnitude as in self-dot-product ). 
+The feature labels contianing 'gyro' refer to gyrometer signal measure of angular velocity.
+The feature labels contianing 'acc' refer to accelerometer signal measure of acceleration.
+The feature labels starting with 'f' and ' t' refer to frequency- and time-domain, respectivly.
+The feature lables containing 'gravity' refer to the gravity component detialed above.
+The feature lables containing 'body' refer to the gravity component detialed above.
+Any feature lable conntaining a duplicate descriptot (e.g. BodyBody) is taken to be a duplication error. 
+
+The specific features included in the tidy data set are:  
+     Mean and stdev of BodyAcc, BodyAccJerk, BodyGyro, and BodyGyroJerk for X, Y, Z and magnitude. 
+     Mean Gravity components in X, Y, Z and gravity magnitude  
+
+Units: 
+1) The authors report the accelerometer data in units of g's and the gyrometer data in units of radians per second. 
+2) The authors report "Features are normalized and bounded within [-1,1]"
+3) An assumption might be that the Acc-features are normalized by g, that Gyro-feaures by radians/sec, the jerk features by an added per sec. 
+4) The feature data includes negative values of stdev and Mag. Whereas stdev and Mag are positive-true by defintion. This combined with authors note 
+about normalization to the range [-1,1] strongly suggest that the data have been "rescaled" (e.g. substract minimum from data and divide by the span) so 
+that any units and interelation between features as reported are not meaningful.  Units therefore are most likely "dimensionless" and not-physical. 
+
+Output:
+Output to local directory file -- fresult.txt   (sorted in order of the 30 subjects, 6 activites each)
+Suggested function for reading -- data<-read.table("fresult.txt",header=T)
+
+ 
+
